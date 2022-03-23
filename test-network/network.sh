@@ -560,7 +560,11 @@ else
 fi
 
 if [ "${MODE}" == "up" ]; then
+  createOrgs
+  networkDown
   networkUp
+  createChannel
+  deployCC
 elif [ "${MODE}" == "createChannel" ]; then
   createChannel
 elif [ "${MODE}" == "deployCC" ]; then
