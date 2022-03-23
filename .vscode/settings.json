@@ -1,0 +1,8 @@
+{
+    "files.autoSave": "onFocusChange",
+    "terminal.integrated.tabs.enabled": true,
+    "gopls": {
+        "build.experimentalWorkspaceModule": true
+    },
+    "go.toolsManagement.autoUpdate": true
+}

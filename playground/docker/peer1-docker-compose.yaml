@@ -1,0 +1,65 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+volumes:
+  peer1.org1.cathaybc.com:
+
+networks:
+  test:
+
+services:
+  peer1.org1.cathaybc.com:
+    container_name: peer1.org1.cathaybc.com
+    image: hyperledger/fabric-peer:2.2.1
+    environment:
+      #Generic peer variables
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      # the following setting starts chaincode containers on the same
+      # bridge network as the peers
+      # https://docs.docker.com/compose/networking/
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=docker_test
+      - FABRIC_LOGGING_SPEC=INFO
+      #- FABRIC_LOGGING_SPEC=DEBUG
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_PROFILE_ENABLED=true
+      - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
+      - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
+      - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      # Peer specific variabes
+      - CORE_PEER_ID=peer1.org1.cathaybc.com
+      - CORE_PEER_ADDRESS=peer1.org1.cathaybc.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer1.org1.cathaybc.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.cathaybc.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.cathaybc.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin
+    volumes:
+        - /var/run/:/host/var/run/
+        - ../crypto-config/:/etc/hyperledger/fabric/crypto-config
+        - ../channel-artifacts/:/etc/hyperledger/fabric/channel-artifacts
+        - ../crypto-config/peerOrganizations/org1.cathaybc.com/peers/peer1.org1.cathaybc.com/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/org1.cathaybc.com/peers/peer1.org1.cathaybc.com/tls:/etc/hyperledger/fabric/tls
+        - peer1.org1.cathaybc.com:/var/hyperledger/production
+        - ../../chaincode:/chaincode
+        - ../config:/config
+    working_dir: /etc/hyperledger/fabric/
+    command: 
+      - /bin/sh
+      - -c
+      - |
+        wget https://go.dev/dl/go1.14.6.linux-amd64.tar.gz
+        tar -C /usr/local -xzf go1.14.6.linux-amd64.tar.gz
+        mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+        peer node start
+    ports:
+      - 7051:7051
+    networks:
+      - test
