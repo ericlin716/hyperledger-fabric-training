@@ -18,6 +18,9 @@ configtxgen -configPath ./config -profile OrgsChannel -outputAnchorPeersUpdate .
 #進入docker container
 docker exec -it peer1.org1.cathaybc.com sh
 
+
+#################################### 以下為 container 內的指令 ####################################
+
 #設定使用admin憑證
 export CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/crypto-config/peerOrganizations/org1.cathaybc.com/users/Admin@org1.cathaybc.com/msp/
 
@@ -29,8 +32,6 @@ peer channel join -b ./channel-artifacts/cathay.block
 
 #更新anchor peer
 peer channel update -o orderer1.cathaybc.com:7050 -c cathay -f ./channel-artifacts/org1Anchors.tx --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
-
-#################################### Chaincode 相關 ####################################
 
 #打包
 peer lifecycle chaincode package test-chaincode.tar.gz --path /chaincode/test-chaincode --lang golang --label test-chaincode_1
@@ -61,3 +62,8 @@ peer chaincode query -o orderer1.cathaybc.com:7050 -C cathay -n test-chaincode -
 
 #Invoke example
 peer chaincode invoke -o orderer1.cathaybc.com:7050 -C cathay -n test-chaincode -c '{"function":"InvokeFunction1","Args":[]}' --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
+
+#################################### 以上為 container 內的指令 ####################################
+
+#查看憑證
+openssl x509 -noout -text -in [CERT PATH]
