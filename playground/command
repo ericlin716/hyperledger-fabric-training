@@ -43,10 +43,10 @@ peer lifecycle chaincode install test-chaincode.tar.gz
 peer lifecycle chaincode queryinstalled
 
 #批准
-peer lifecycle chaincode approveformyorg -o orderer1.cathaybc.com:7050 --channelID cathay --name test-chaincode --version 1 --init-required --package-id [Replace your package id] --sequence 1 --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
+peer lifecycle chaincode approveformyorg -o orderer1.cathaybc.com:7050 --channelID cathay --name test-chaincode --version 1 --sequence 1 --init-required --package-id [Replace your package id] --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
 
 #查看批准狀態
-peer lifecycle chaincode checkcommitreadiness --channelID cathay --name test-chaincode --version 1 --sequence 2 --output json --init-required
+peer lifecycle chaincode checkcommitreadiness --channelID cathay --name test-chaincode --version 1 --sequence 1 --output json --init-required
 
 #提交
 peer lifecycle chaincode commit -o orderer1.cathaybc.com:7050 --channelID cathay --name test-chaincode --version 1 --sequence 1 --init-required --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
@@ -58,7 +58,7 @@ peer lifecycle chaincode querycommitted --channelID cathay --name test-chaincode
 peer chaincode invoke -o orderer1.cathaybc.com:7050 -C cathay -n test-chaincode --isInit -c '{"function":"Init","Args":[]}' --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
 
 #Query example
-peer chaincode query -o orderer1.cathaybc.com:7050 -C cathay -n test-chaincode -c '{"function":"QueryFunction1","Args":[]}' --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
+peer chaincode query -C cathay -n test-chaincode -c '{"function":"QueryFunction1","Args":[]}'
 
 #Invoke example
 peer chaincode invoke -o orderer1.cathaybc.com:7050 -C cathay -n test-chaincode -c '{"function":"InvokeFunction1","Args":[]}' --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
