@@ -79,6 +79,41 @@ Organizations:
             - Host: peer1.org1.cathaybc.com
               Port: 7051
 
+    - &Org2
+        # DefaultOrg defines the organization which is used in the sampleconfig
+        # of the fabric.git development environment
+        Name: Org2MSP
+
+        # ID to load the MSP definition as
+        ID: Org2MSP
+
+        MSPDir: ../crypto-config/peerOrganizations/org2.cathaybc.com/msp
+
+        # Policies defines the set of policies at this level of the config tree
+        # For organization policies, their canonical path is usually
+        #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('Org2MSP.admin', 'Org2MSP.peer', 'Org2MSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('Org2MSP.admin', 'Org2MSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('Org2MSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('Org2MSP.peer')"
+
+        # leave this flag set to true.
+        AnchorPeers:
+            # AnchorPeers defines the location of peers which can be used
+            # for cross org gossip communication.  Note, this value is only
+            # encoded in the genesis block in the Application section context
+            - Host: peer1.org2.cathaybc.com
+              Port: 7051
+
 ################################################################################
 #
 #   SECTION: Capabilities
@@ -286,6 +321,7 @@ Profiles:
             SampleConsortium:
                 Organizations:
                     - *Org1
+                    - *Org2
     OrgsChannel:
         Consortium: SampleConsortium
         <<: *ChannelDefaults
@@ -293,5 +329,6 @@ Profiles:
             <<: *ApplicationDefaults
             Organizations:
                 - *Org1
+                - *Org2
             Capabilities:
                 <<: *ApplicationCapabilities
