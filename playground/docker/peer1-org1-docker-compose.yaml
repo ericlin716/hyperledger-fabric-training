@@ -55,6 +55,7 @@ services:
         mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
         peer node start
     ports:
+      # HOST_PORT:CONTAINER_PORT，若啟動多個節點只須改 HOST_PORT 即可
       - 7051:7051
     networks:
       - test

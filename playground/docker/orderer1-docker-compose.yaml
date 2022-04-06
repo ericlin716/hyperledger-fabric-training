@@ -36,6 +36,7 @@ services:
         - ../crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/:/var/hyperledger/orderer/tls
         - orderer1.cathaybc.com:/var/hyperledger/production/orderer
     ports:
+      # HOST_PORT:CONTAINER_PORT，若啟動多個節點只須改 HOST_PORT 即可
       - 7050:7050
     networks:
       - test

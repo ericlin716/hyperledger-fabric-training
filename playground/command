@@ -43,12 +43,13 @@ peer lifecycle chaincode install test-chaincode.tar.gz
 peer lifecycle chaincode queryinstalled
 
 #批准
-peer lifecycle chaincode approveformyorg -o orderer1.cathaybc.com:7050 --channelID cathay --name test-chaincode --version 1 --sequence 1 --init-required --package-id test-chaincode_1:b1f260628148d009c492419ea8aafea2f67a5c95614d05c37e7787567d3756ee --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
+peer lifecycle chaincode approveformyorg -o orderer1.cathaybc.com:7050 --channelID cathay --name test-chaincode --version 1 --sequence 1 --init-required --package-id [貼上 Package ID] --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
 
 #查看批准狀態
 peer lifecycle chaincode checkcommitreadiness --channelID cathay --name test-chaincode --version 1 --sequence 1 --output json --init-required
 
 #提交
+#若需要兩節點背書，須加上 --peerAddresses peer1.org1.cathaybc.com:7051 --tlsRootCertFiles ./crypto-config/peerOrganizations/org1.cathaybc.com/peers/peer1.org1.cathaybc.com/tls/ca.crt --peerAddresses peer1.org2.cathaybc.com:7051 --tlsRootCertFiles ./crypto-config/peerOrganizations/org2.cathaybc.com/peers/peer1.org2.cathaybc.com/tls/ca.crt
 peer lifecycle chaincode commit -o orderer1.cathaybc.com:7050 --channelID cathay --name test-chaincode --version 1 --sequence 1 --init-required --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
 
 #查看提交
@@ -61,6 +62,7 @@ peer chaincode invoke -o orderer1.cathaybc.com:7050 -C cathay -n test-chaincode 
 peer chaincode query -C cathay -n test-chaincode -c '{"function":"QueryFunction1","Args":[]}'
 
 #Invoke example
+#若需要兩節點背書，須加上 --peerAddresses peer1.org1.cathaybc.com:7051 --tlsRootCertFiles ./crypto-config/peerOrganizations/org1.cathaybc.com/peers/peer1.org1.cathaybc.com/tls/ca.crt --peerAddresses peer1.org2.cathaybc.com:7051 --tlsRootCertFiles ./crypto-config/peerOrganizations/org2.cathaybc.com/peers/peer1.org2.cathaybc.com/tls/ca.crt
 peer chaincode invoke -o orderer1.cathaybc.com:7050 -C cathay -n test-chaincode -c '{"function":"InvokeFunction1","Args":[]}' --waitForEvent --tls --cafile ./crypto-config/ordererOrganizations/cathaybc.com/orderers/orderer1.cathaybc.com/tls/ca.crt
 
 #################################### 以上為 container 內的指令 ####################################
