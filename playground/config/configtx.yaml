@@ -182,7 +182,7 @@ Application: &ApplicationDefaults
 Orderer: &OrdererDefaults
 
     # Orderer Type: The orderer implementation to start
-    OrdererType: etcdraft
+    OrdererType: solo
 
     EtcdRaft:
         Consenters:
