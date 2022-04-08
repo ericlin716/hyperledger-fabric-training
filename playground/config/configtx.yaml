@@ -181,7 +181,7 @@ Application: &ApplicationDefaults
 ################################################################################
 Orderer: &OrdererDefaults
 
-    # Orderer Type: The orderer implementation to start
+    # Orderer Type: The orderer implementation to start, ex: solo or etcdraft
     OrdererType: solo
 
     EtcdRaft:
