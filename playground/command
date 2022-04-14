@@ -7,6 +7,12 @@ docker rm -f $(docker ps -qa)
 #移除所有volume，建議在建置新的區塊鏈網路前執行一次
 docker volume prune -f
 
+#建議每次重新架鏈前都刪掉之前建立的憑證
+rm -rf ./crypto-config/
+
+#建議每次重新架鏈前都刪掉之前鏈相關的channel文件
+rm -rf ./channel-artifacts/
+
 #################################### 以下為 Fabric 相關的指令 ####################################
 
 #產生orderer憑證
