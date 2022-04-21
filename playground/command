@@ -1,6 +1,6 @@
 #設定PATH路徑，為什麼需要設定?請參考 https://iter01.com/558435.html
 #如果是Macbook M1架構請改執行 export PATH=${PWD}/../bin/linux-aarch64:$PATH
-export PATH=${PWD}/../bin/linux-aarch64:$PATH
+export PATH=${PWD}/../bin/linux-amd64:$PATH
 
 #移除所有正在執行的container，建議在建置新的區塊鏈網路前執行一次
 docker rm -f $(docker ps -qa)
