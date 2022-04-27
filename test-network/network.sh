@@ -566,7 +566,7 @@ if [ "${MODE}" == "up" ]; then
   networkDown
   networkUp
   createChannel
-  deployCC
+  # deployCC
 elif [ "${MODE}" == "createChannel" ]; then
   createChannel
 elif [ "${MODE}" == "deployCC" ]; then
