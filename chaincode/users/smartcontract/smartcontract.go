@@ -22,15 +22,47 @@ type User struct {
 type Transaction struct {
 	Hash         string `json:"hash"`
 	Amount       string `json:"amount"`
-	Currency string `json:"currency"`
-	Date    string `json:"date"`
+	Currency     string `json:"currency"`
+	Date         string `json:"date"`
+	BankId       string `json:"bank_id"`
 }
 
 type TransactionHashMapUserId struct {
 	UserId           string `json:"user_id"`
 }
 
+type Bank struct {
+	ID                 string `json:"id"`          // 統編
+	Name               string `json:"name"`
+	TransactionCount   int    `json:"transaction_count"`
+}
+
+const BankPrefix = "Bank_"    //前綴詞
+
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
+	var cathayBank Bank = Bank{
+		ID: "04231910",
+		Name: "國泰世華商業銀行",
+		TransactionCount: 0,
+	}
+	var fubonBank Bank = Bank{
+			ID: "03750168",
+			Name: "台北富邦商業銀行",
+			TransactionCount: 0,
+	}
+
+	cathayBankJson, err := json.Marshal(cathayBank)
+	if err != nil {
+		return err
+	}
+	fubonBankJson, err := json.Marshal(fubonBank)
+	if err != nil {
+		return err
+	}
+	
+	ctx.GetStub().PutState(BankPrefix+cathayBank.ID, cathayBankJson)
+	ctx.GetStub().PutState(BankPrefix+fubonBank.ID, fubonBankJson)
+
 	return nil
 }
 
@@ -110,7 +142,7 @@ func (s *SmartContract) DeleteUser(ctx contractapi.TransactionContextInterface, 
 }
 
 func (s *SmartContract) GetAllUsers(ctx contractapi.TransactionContextInterface) ([]*User, error) {
-	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
+	resultsIterator, err := ctx.GetStub().GetStateByRange("0", "99999")
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +154,7 @@ func (s *SmartContract) GetAllUsers(ctx contractapi.TransactionContextInterface)
 		if err != nil {
 			return nil, err
 		}
-
+		fmt.Println(queryResponse)
 		var user User
 		err = json.Unmarshal(queryResponse.Value, &user)
 		if err != nil {
@@ -134,7 +166,7 @@ func (s *SmartContract) GetAllUsers(ctx contractapi.TransactionContextInterface)
 	return users, nil
 }
 
-func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInterface, userId string, hash string, amount string, currency string, date string) (bool, error) {
+func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInterface, userId string, hash string, amount string, currency string, date string, bankId string) (bool, error) {
 	user, err := s.GetUser(ctx, userId)
 	if err != nil {
 		return false, err
@@ -166,6 +198,20 @@ func (s *SmartContract) CreateTransaction(ctx contractapi.TransactionContextInte
 
 	ctx.GetStub().PutState(hash, transactionHashMapUserIdJson)
 
+	// add bank count
+	bank, err := s.GetBankByID(ctx, bankId)
+	if err != nil {
+		return false, err
+	}
+	bank.TransactionCount++
+
+	bankJson, err := json.Marshal(bank)
+	if err != nil {
+		return false, err
+	}
+
+	ctx.GetStub().PutState(BankPrefix+bankId, bankJson)
+
 	return true, nil
 }
 
@@ -188,4 +234,22 @@ func (s *SmartContract) GetUserByTransactionHash(ctx contractapi.TransactionCont
 		return nil, err
 	}
 	return user, nil
+}
+
+func (s *SmartContract) GetBankByID(ctx contractapi.TransactionContextInterface, bankId string) (*Bank, error) {
+	bankJson, err := ctx.GetStub().GetState(BankPrefix+bankId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if bankJson == nil {
+		return nil, fmt.Errorf("the bankJson %s does not exist", BankPrefix+bankId)
+	}
+	var bank Bank
+	err = json.Unmarshal(bankJson, &bank)
+	fmt.Println(string(bankJson))
+	if err != nil {
+		return nil, err
+	}
+
+	return &bank, nil
 }

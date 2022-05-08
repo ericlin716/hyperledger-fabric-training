@@ -34,6 +34,7 @@ var transaction1 smartcontract.Transaction = smartcontract.Transaction{
 	Amount:    "200",
 	Currency:  "USD",
 	Date:      "2022-04-14",
+	BankId: "04231910",
 }
 
 var transaction2 smartcontract.Transaction = smartcontract.Transaction{
@@ -41,6 +42,7 @@ var transaction2 smartcontract.Transaction = smartcontract.Transaction{
 	Amount:    "500",
 	Currency:  "NTD",
 	Date:      "2022-04-16",
+	BankId: "04231910",
 }
 
 func TestMain(m *testing.M) {
@@ -60,6 +62,7 @@ func NewStub() {
 		os.Exit(0)
 	}
 	Stub = shimtest.NewMockStub("main", Scc)
+	MockInitLedger()
 }
 
 func Test_CreateUser(t *testing.T) {
@@ -158,6 +161,7 @@ func Test_GetAllUsers(t *testing.T) {
 	if err != nil {
 		fmt.Println("GetAllUsers error", err)
 	}
+	fmt.Println(users)
 
 	assert.Equal(t, len(users), 2)
 }
@@ -251,13 +255,13 @@ func Test_CreateTransaction(t *testing.T) {
 	if err != nil {
 		t.FailNow()
 	}
-	result1, err := MockCreateTransaction(user1.ID, transaction1.Hash, transaction1.Amount, transaction1.Currency, transaction1.Date)
+	result1, err := MockCreateTransaction(user1.ID, transaction1.Hash, transaction1.Amount, transaction1.Currency, transaction1.Date, transaction1.BankId)
 	if err != nil {
 		fmt.Println("CreateTransaction User", err)
 	}
 	fmt.Println("CreateTransaction transaction1", result1)
 
-	result2, err := MockCreateTransaction(user1.ID, transaction2.Hash, transaction2.Amount, transaction2.Currency, transaction2.Date)
+	result2, err := MockCreateTransaction(user1.ID, transaction2.Hash, transaction2.Amount, transaction2.Currency, transaction2.Date, transaction1.BankId)
 	if err != nil {
 		fmt.Println("CreateTransaction User", err)
 	}
@@ -273,7 +277,7 @@ func Test_CreateTransaction(t *testing.T) {
 
 }
 
-func MockCreateTransaction(userId string, hash string, amount string, currency string, date string) (bool, error) {
+func MockCreateTransaction(userId string, hash string, amount string, currency string, date string, bankId string) (bool, error) {
 	res := Stub.MockInvoke("uuid",
 		[][]byte{
 			[]byte("CreateTransaction"),
@@ -282,6 +286,7 @@ func MockCreateTransaction(userId string, hash string, amount string, currency s
 			[]byte(amount),
 			[]byte(currency),
 			[]byte(date),
+			[]byte(bankId),
 		})
 	if res.Status != shim.OK {
 		fmt.Println("CreateTransaction failed", string(res.Message))
@@ -307,13 +312,13 @@ func Test_GetUserByTransactionHash(t *testing.T) {
 		t.FailNow()
 	}
 
-	result1, err := MockCreateTransaction(user1.ID, transaction1.Hash, transaction1.Amount, transaction1.Currency, transaction1.Date)
+	result1, err := MockCreateTransaction(user1.ID, transaction1.Hash, transaction1.Amount, transaction1.Currency, transaction1.Date, transaction1.BankId)
 	if err != nil {
 		fmt.Println("CreateTransaction User", err)
 	}
 	fmt.Println("CreateTransaction transaction1", result1)
 
-	result2, err := MockCreateTransaction(user2.ID, transaction2.Hash, transaction2.Amount, transaction2.Currency, transaction2.Date)
+	result2, err := MockCreateTransaction(user2.ID, transaction2.Hash, transaction2.Amount, transaction2.Currency, transaction2.Date, transaction1.BankId)
 	if err != nil {
 		fmt.Println("CreateTransaction User", err)
 	}
@@ -352,4 +357,69 @@ func MockGetUserByTransactionHash(hash string) (*smartcontract.User, error) {
 		}
 		json.Unmarshal(res.Payload, &result)
 		return &result, nil
+}
+
+// part 3
+
+func MockInitLedger() (error) {
+	res := Stub.MockInvoke("uuid",
+		[][]byte{
+			[]byte("InitLedger"),
+		})
+		if res.Status != shim.OK {
+			fmt.Println("MockInitLedger failed", string(res.Message))
+			return errors.New("MockInitLedger error")
+		}
+		return nil
+}
+
+func MockGetBankByID(bankId string) (*smartcontract.Bank, error) {
+	var result smartcontract.Bank
+	res := Stub.MockInvoke("uuid",
+		[][]byte{
+			[]byte("GetBankByID"),
+			[]byte(bankId),
+		})
+	if res.Status != shim.OK {
+		fmt.Println("GetBankByID failed", string(res.Message))
+		return nil, errors.New("GetBankByID error")
+	}
+	json.Unmarshal(res.Payload, &result)
+	return &result, nil
+}
+
+// func Test_InitLedger(t *testing.T) {
+// 	fmt.Println("InitLedger-----------------")
+// 	NewStub()
+// 	var err = MockInitLedger()
+// 	assert.Equal(t, err, nil)
+// }
+
+func Test_BankTransactionCount(t *testing.T) {
+	fmt.Println("BankTransactionCount-----------------")
+	NewStub()
+	err := MockCreateUser(user1.ID, user1.Name, user1.Email)
+	if err != nil {
+		t.FailNow()
+	}
+	result1, err := MockCreateTransaction(user1.ID, transaction1.Hash, transaction1.Amount, transaction1.Currency, transaction1.Date, transaction1.BankId)
+	if err != nil {
+		fmt.Println("CreateTransaction User", err)
+	}
+	fmt.Println("CreateTransaction transaction1", result1)
+
+	result2, err := MockCreateTransaction(user1.ID, transaction2.Hash, transaction2.Amount, transaction2.Currency, transaction2.Date, transaction1.BankId)
+	if err != nil {
+		fmt.Println("CreateTransaction User", err)
+	}
+	fmt.Println("CreateTransaction transaction2", result2)
+
+	bank, err := MockGetBankByID(transaction1.BankId)
+	if err != nil {
+		fmt.Println("get bank error", err)
+	}
+	
+	fmt.Println(bank)
+	assert.Equal(t, bank.TransactionCount, 2)
+
 }
